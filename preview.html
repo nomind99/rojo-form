@@ -1,0 +1,138 @@
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwfMoUDRRTFpR0mELt9D2JczvmJSbzsWh_Io74GHT4lxLetq3l18VA1LhgQhbcAySXhg/exec";
+
+let cs = 0;
+const ts = 11;
+const sn = [
+  'INICIO',
+  '01 — NEGOCIO',
+  '02 — PRODUCTO',
+  '03 — PROVEEDORES',
+  '04 — CLIENTE',
+  '05 — COMPETENCIA',
+  '06 — MARCA',
+  '07 — DIGITAL',
+  '08 — VENTAS',
+  '09 — OBJETIVOS',
+  '10 — CIERRE'
+];
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+    document.getElementById('header').style.opacity = '1';
+    document.getElementById('header').style.transition = 'opacity .5s';
+    document.getElementById('mainContent').style.opacity = '1';
+    document.getElementById('mainContent').style.transition = 'opacity .5s .2s';
+  }, 1800);
+});
+
+function up() {
+  document.getElementById('progressBar').style.width = (cs / (ts - 1)) * 100 + '%';
+  document.getElementById('headerStep').textContent = sn[cs] || '';
+}
+
+function ss(i) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const t = document.querySelector(`[data-section="${i}"]`);
+  if (t) {
+    void t.offsetWidth;
+    t.classList.add('active');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  up();
+}
+
+function nextSection() {
+  if (cs < ts - 1) {
+    cs++;
+    ss(cs);
+  }
+}
+
+function prevSection() {
+  if (cs > 0) {
+    cs--;
+    ss(cs);
+  }
+}
+
+function selectOption(el) {
+  el.closest('.option-group').querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+
+function toggleOption(el) {
+  el.classList.toggle('selected');
+  const i = el.querySelector('input');
+  i.checked = !i.checked;
+}
+
+function collectFormData() {
+  const fd = {};
+
+  document.querySelectorAll('input, textarea').forEach(el => {
+    if (!el.name) return;
+
+    if (el.type === 'radio') {
+      if (el.checked) fd[el.name] = el.value;
+    } else if (el.type === 'checkbox') {
+      if (!fd[el.name]) fd[el.name] = [];
+      if (el.checked) fd[el.name].push(el.value);
+    } else {
+      fd[el.name] = el.value ? el.value.trim() : '';
+    }
+  });
+
+  return fd;
+}
+
+async function submitForm() {
+  const submitBtn = document.querySelector('.btn-submit');
+  const originalText = submitBtn.textContent;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Enviando...';
+  submitBtn.style.opacity = '0.7';
+  submitBtn.style.cursor = 'not-allowed';
+
+  try {
+    const rawData = collectFormData();
+
+    const payload = {};
+    Object.keys(rawData).forEach(key => {
+      if (Array.isArray(rawData[key])) {
+        payload[key] = rawData[key].join(', ');
+      } else {
+        payload[key] = rawData[key];
+      }
+    });
+
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body: new URLSearchParams(payload).toString()
+    });
+
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('successScreen').classList.add('active');
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('headerStep').textContent = 'COMPLETADO';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (error) {
+    console.error('Error al enviar el formulario:', error);
+    alert('Hubo un problema al enviar el briefing. Revisa la implementación del Apps Script e inténtalo otra vez.');
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+    submitBtn.style.opacity = '1';
+    submitBtn.style.cursor = 'pointer';
+  }
+}
+
+up();
+</script>
