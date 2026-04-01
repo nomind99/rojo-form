@@ -1,138 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROJO — Briefing de Marca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rojo:#E01A1A;--rojo-dark:#B81414;--negro:#0A0A0A;--negro-card:#111;
+            --negro-input:#1A1A1A;--blanco:#F5F5F5;--gris:#888;--gris-oscuro:#333;
+            --font-display:'Bricolage Grotesque',sans-serif;
+            --font-body:'Bricolage Grotesque',sans-serif;
+            --font-accent:'Bebas Neue',sans-serif;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{font-family:var(--font-body);font-weight:400;background:var(--negro);color:var(--blanco);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+        .loader{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--negro);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s,visibility .6s}
+        .loader.hidden{opacity:0;visibility:hidden}
+        .loader-logo{font-family:var(--font-display);font-size:clamp(80px,20vw,180px);font-weight:800;color:var(--rojo);letter-spacing:.02em;animation:pulseIn 1.2s ease-out forwards;text-shadow:0 0 80px rgba(224,26,26,.4)}
+        @keyframes pulseIn{0%{opacity:0;transform:scale(.8);filter:blur(10px)}50%{opacity:1;transform:scale(1.05);filter:blur(0)}100%{opacity:1;transform:scale(1)}}
+        .progress-container{position:fixed;top:0;left:0;width:100%;height:4px;background:var(--negro-card);z-index:1000}
+        .progress-bar{height:100%;background:var(--rojo);width:0%;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 20px rgba(224,26,26,.5)}
+        .header{position:fixed;top:4px;left:0;width:100%;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;z-index:999;background:rgba(10,10,10,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.04)}
+        .header-logo{font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--rojo);letter-spacing:.02em}
+        .header-step{font-family:var(--font-body);font-size:12px;color:var(--gris);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+        .main{max-width:720px;margin:0 auto;padding:100px 24px 60px}
+        .section{display:none;animation:fadeUp .5s ease forwards}
+        .section.active{display:block}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+        .intro-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--rojo);border:1px solid rgba(224,26,26,.3);padding:6px 14px;border-radius:2px;margin-bottom:32px}
+        .intro-title{font-family:var(--font-display);font-size:clamp(36px,8vw,60px);font-weight:800;line-height:1.05;margin-bottom:12px;letter-spacing:-.02em}
+        .intro-title .highlight{color:var(--rojo)}
+        .intro-subtitle{font-family:var(--font-display);font-size:clamp(20px,4vw,30px);font-weight:700;color:var(--gris);letter-spacing:.01em;margin-bottom:40px}
+        .intro-text{font-size:16px;line-height:1.75;color:#CCC;margin-bottom:24px;font-weight:400}
+        .intro-quote{border-left:3px solid var(--rojo);padding:20px 24px;margin:32px 0;background:rgba(224,26,26,.04)}
+        .intro-quote p{font-family:var(--font-display);font-size:19px;font-weight:600;line-height:1.45;color:var(--blanco)}
+        .intro-quote .source{font-size:13px;font-weight:400;color:var(--gris);margin-top:8px;display:block}
+        .time-badge{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--gris);margin-top:32px;padding:10px 16px;background:var(--negro-card);border-radius:2px;font-weight:500}
+        .time-badge svg{width:16px;height:16px;stroke:var(--gris)}
+        .section-number{font-family:var(--font-display);font-size:64px;font-weight:800;color:rgba(224,26,26,.10);line-height:1;margin-bottom:-4px}
+        .section-title{font-family:var(--font-display);font-size:clamp(28px,6vw,40px);font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+        .section-desc{font-size:15px;color:var(--gris);margin-bottom:40px;line-height:1.6}
+        .field{margin-bottom:32px}
+        .field-label{display:block;font-size:14px;font-weight:700;color:var(--blanco);margin-bottom:6px}
+        .field-hint{display:block;font-size:13px;font-weight:400;color:var(--gris);margin-bottom:10px;line-height:1.5}
+        input[type="text"],input[type="number"],textarea,select{width:100%;background:var(--negro-input);border:1px solid var(--gris-oscuro);color:var(--blanco);font-family:var(--font-body);font-size:15px;font-weight:400;padding:14px 16px;border-radius:3px;outline:none;transition:border-color .3s,box-shadow .3s}
+        input[type="text"]:focus,input[type="number"]:focus,textarea:focus,select:focus{border-color:var(--rojo);box-shadow:0 0 0 3px rgba(224,26,26,.1)}
+        textarea{min-height:100px;resize:vertical;line-height:1.6}
+        ::placeholder{color:#555}
+        .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        @media(max-width:500px){.field-row{grid-template-columns:1fr}}
+        .field-numbered{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+        .field-numbered .num{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--rojo);min-width:28px;padding-top:12px;opacity:.6}
+        .field-numbered input{flex:1}
+        .option-group{display:flex;flex-direction:column;gap:8px}
+        .option-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--negro-input);border:1px solid var(--gris-oscuro);border-radius:3px;cursor:pointer;transition:border-color .2s,background .2s}
+        .option-item:hover{border-color:#555}
+        .option-item.selected{border-color:var(--rojo);background:rgba(224,26,26,.06)}
+        .option-item input[type="radio"],.option-item input[type="checkbox"]{display:none}
+        .option-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--gris-oscuro);position:relative;flex-shrink:0;transition:border-color .2s}
+        .option-item.selected .option-dot{border-color:var(--rojo)}
+        .option-item.selected .option-dot::after{content:'';position:absolute;top:3px;left:3px;width:8px;height:8px;background:var(--rojo);border-radius:50%}
+        .option-text{font-size:14px;font-weight:500}
+        .btn-row{display:flex;justify-content:space-between;align-items:center;margin-top:48px;padding-top:32px;border-top:1px solid rgba(255,255,255,.06)}
+        .btn{font-family:var(--font-body);font-size:14px;font-weight:700;letter-spacing:.03em;padding:14px 32px;border:none;border-radius:3px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+        .btn-primary{background:var(--rojo);color:#fff}
+        .btn-primary:hover{background:var(--rojo-dark);box-shadow:0 0 30px rgba(224,26,26,.25);transform:translateY(-1px)}
+        .btn-secondary{background:transparent;color:var(--gris);border:1px solid var(--gris-oscuro)}
+        .btn-secondary:hover{color:var(--blanco);border-color:#555}
+        .btn-submit{background:var(--rojo);color:#fff;width:100%;padding:18px;font-size:16px;font-family:var(--font-display);font-weight:700;letter-spacing:.03em}
+        .btn-submit:hover{background:var(--rojo-dark);box-shadow:0 0 40px rgba(224,26,26,.3)}
+        .divider{width:40px;height:3px;background:var(--rojo);margin:40px 0}
+        .footer{text-align:center;padding:60px 24px 40px;font-size:12px;color:#444;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+        .footer span{color:var(--rojo)}
+        .success-screen{display:none;text-align:center;padding:80px 24px;animation:fadeUp .6s ease forwards}
+        .success-screen.active{display:block}
+        .success-check{width:72px;height:72px;border-radius:50%;background:rgba(224,26,26,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
+        .success-check svg{width:32px;height:32px;stroke:var(--rojo)}
+        .success-title{font-family:var(--font-display);font-size:32px;font-weight:800;margin-bottom:16px}
+        .success-text{font-size:16px;color:var(--gris);line-height:1.6;max-width:460px;margin:0 auto}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--negro)}::-webkit-scrollbar-thumb{background:var(--gris-oscuro);border-radius:3px}
+        body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;opacity:.02;pointer-events:none;z-index:9998;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+    </style>
+</head>
+<body>
+<div class="loader" id="loader"><div class="loader-logo">ROJO</div></div>
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+<div class="header" id="header" style="opacity:0"><div class="header-logo">ROJO</div><div class="header-step" id="headerStep">INICIO</div></div>
+<div class="main" id="mainContent" style="opacity:0">
+
+<div class="section active" data-section="0">
+    <div class="intro-badge">Briefing de marca — 2026</div>
+    <h1 class="intro-title">No vendes<br>réplicas.<br><span class="highlight">Vendes acceso.</span></h1>
+    <p class="intro-subtitle">Este es el primer paso.</p>
+    <p class="intro-text">Hoy en Bogotá hay cientos de tiendas de tenis que se ven exactamente igual. Fotos genéricas, precios en pantalla, un número de WhatsApp. Son intercambiables. Si una cierra mañana, nadie la extraña.</p>
+    <p class="intro-text"><strong style="color:var(--blanco)">Rojo no va a ser una más.</strong></p>
+    <p class="intro-text">La visión es convertir a Rojo en la marca de referencia para tenis con estilo a precios reales en Bogotá — y después en toda Colombia.</p>
+    <div class="intro-quote"><p>Piensa en lo que hizo Feid con el reggaetón. No inventó el género — pero creó una estética tan propia que es imposible confundirlo. Ese verde, esa actitud. Rojo puede ser eso para los tenis.</p><span class="source">— Dirección Creativa</span></div>
+    <p class="intro-text">Para construir eso, necesitamos información real sobre tu negocio. Cada respuesta alimenta las decisiones de marca, contenido, web y publicidad. Sé directo — no hay respuestas correctas o incorrectas.</p>
+    <div class="time-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>30-45 minutos · 10 secciones · Todo confidencial</div>
+    <div class="btn-row" style="border:none;padding-top:0;margin-top:40px"><div></div><button class="btn btn-primary" onclick="nextSection()">Empezar →</button></div>
+</div>
+
+<div class="section" data-section="1">
+    <div class="section-number">01</div><h2 class="section-title">El negocio</h2><p class="section-desc">Lo básico sobre Rojo: quién eres, dónde estás, cómo funciona hoy.</p>
+    <div class="field"><label class="field-label">Nombre completo de la marca / negocio</label><span class="field-hint">Si tienes razón social diferente al nombre comercial, incluye ambos.</span><input type="text" name="nombre_negocio" placeholder="Ej: Rojo Tennis / Rojo SAS"></div>
+    <div class="field"><label class="field-label">¿Desde cuándo opera Rojo? ¿Cómo nació?</label><span class="field-hint">La historia corta — por qué decidiste abrir una tienda de tenis.</span><textarea name="historia" placeholder="Cuéntanos..."></textarea></div>
+    <div class="field"><label class="field-label">¿Cuántas personas trabajan en el negocio?</label><input type="text" name="equipo" placeholder="Ej: 3 personas — yo, un vendedor, mi hermano en envíos"></div>
+    <div class="field"><label class="field-label">Ubicación exacta en CC Visto</label><input type="text" name="ubicacion" placeholder="Ej: Piso 2, local 2045"></div>
+    <div class="field-row"><div class="field"><label class="field-label">Horario</label><input type="text" name="horario" placeholder="Lun-Sáb 8am-6pm"></div><div class="field"><label class="field-label">WhatsApp de ventas</label><input type="text" name="whatsapp" placeholder="312 345 6789"></div></div>
+    <div class="field"><label class="field-label">¿Otro punto de venta o canal activo?</label><textarea name="canales" placeholder="Otro local, Instagram, TikTok, MercadoLibre..." rows="3"></textarea></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="2">
+    <div class="section-number">02</div><h2 class="section-title">El producto</h2><p class="section-desc">Qué vendes, a qué precio, qué marcas. 100% confidencial.</p>
+    <div class="field"><label class="field-label">¿Qué tipo de tenis vende Rojo?</label><span class="field-hint">Info solo interna, nunca se publica.</span><div class="option-group"><label class="option-item" onclick="selectOption(this)"><input type="radio" name="tipo" value="aaa"><div class="option-dot"></div><span class="option-text">Importados triple A / réplicas premium</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="tipo" value="outlet"><div class="option-dot"></div><span class="option-text">Originales con descuento / outlet</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="tipo" value="mezcla"><div class="option-dot"></div><span class="option-text">Mezcla de ambos</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="tipo" value="otro"><div class="option-dot"></div><span class="option-text">Otro</span></label></div></div>
+    <div class="field"><label class="field-label">Marcas que maneja</label><textarea name="marcas" placeholder="Nike, Adidas, Jordan, New Balance, Puma..." rows="3"></textarea></div>
+    <div class="field"><label class="field-label">¿Cuántas referencias en tienda?</label><input type="text" name="refs" placeholder="Ej: 80-100 referencias"></div>
+    <div class="field"><label class="field-label">Rango de precios (COP)</label><div class="field-row"><div><span class="field-hint">Más bajo</span><input type="text" name="pmin" placeholder="$ 60,000"></div><div><span class="field-hint">Más alto</span><input type="text" name="pmax" placeholder="$ 180,000"></div></div></div>
+    <div class="field"><label class="field-label">¿Dónde se concentran las ventas?</label><input type="text" name="rango" placeholder="Ej: Entre $80,000 y $120,000"></div>
+    <div class="field"><label class="field-label">¿Tenis para quién?</label><div class="option-group"><label class="option-item" onclick="toggleOption(this)"><input type="checkbox" name="gen" value="hombre"><div class="option-dot"></div><span class="option-text">Hombre</span></label><label class="option-item" onclick="toggleOption(this)"><input type="checkbox" name="gen" value="mujer"><div class="option-dot"></div><span class="option-text">Mujer</span></label><label class="option-item" onclick="toggleOption(this)"><input type="checkbox" name="gen" value="nino"><div class="option-dot"></div><span class="option-text">Niño/a</span></label></div></div>
+    <div class="field"><label class="field-label">Top 5 — Los que más se venden</label><span class="field-hint">Los que la gente más pide, los que se agotan.</span><div class="field-numbered"><span class="num">01</span><input type="text" name="t1" placeholder="Modelo / marca"></div><div class="field-numbered"><span class="num">02</span><input type="text" name="t2" placeholder="Modelo / marca"></div><div class="field-numbered"><span class="num">03</span><input type="text" name="t3" placeholder="Modelo / marca"></div><div class="field-numbered"><span class="num">04</span><input type="text" name="t4" placeholder="Modelo / marca"></div><div class="field-numbered"><span class="num">05</span><input type="text" name="t5" placeholder="Modelo / marca"></div></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="3">
+    <div class="section-number">03</div><h2 class="section-title">Proveedores y operación</h2><p class="section-desc">De dónde viene el producto, rotación, garantías.</p>
+    <div class="field"><label class="field-label">¿Proveedor principal?</label><span class="field-hint">Bodega en Cali, importador directo, proveedor local.</span><textarea name="prov" placeholder="Cuéntanos..." rows="3"></textarea></div>
+    <div class="field"><label class="field-label">¿Cada cuánto rota el inventario?</label><input type="text" name="rot" placeholder="Ej: Cada 2 semanas llega mercancía nueva"></div>
+    <div class="field"><label class="field-label">¿Qué tallas?</label><input type="text" name="tallas" placeholder="Ej: 35 a 44 hombre, 35 a 40 mujer"></div>
+    <div class="field"><label class="field-label">¿Garantía o política de cambio?</label><textarea name="gar" placeholder="Ej: Cambio de talla en 8 días..." rows="3"></textarea></div>
+    <div class="field"><label class="field-label">¿Vende accesorios?</label><input type="text" name="acc" placeholder="Medias, gorras, cordones..."></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="4">
+    <div class="section-number">04</div><h2 class="section-title">El cliente</h2><p class="section-desc">Quién compra hoy, por qué te eligen, cómo te encuentran.</p>
+    <div class="field"><label class="field-label">Descríbeme a tu cliente más frecuente</label><span class="field-hint">Edad, hombre o mujer, de dónde viene, cómo viste, qué pregunta.</span><textarea name="cli" placeholder="Cuéntanos quién entra a tu tienda..." rows="4"></textarea></div>
+    <div class="field"><label class="field-label">Razón #1 por la que te compran</label><input type="text" name="razon" placeholder="Precio, variedad, que se ven iguales..."></div>
+    <div class="field"><label class="field-label">¿Clientes mayoristas?</label><div class="option-group"><label class="option-item" onclick="selectOption(this)"><input type="radio" name="may" value="si_muchos"><div class="option-dot"></div><span class="option-text">Sí, parte importante del negocio</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="may" value="si_pocos"><div class="option-dot"></div><span class="option-text">Sí, pero pocos</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="may" value="no"><div class="option-dot"></div><span class="option-text">No, solo detal</span></label></div></div>
+    <div class="field"><label class="field-label">Detalle de mayoristas (si aplica)</label><textarea name="mayd" placeholder="¿De dónde? ¿Cuántos pares? ¿Frecuencia?" rows="3"></textarea></div>
+    <div class="field"><label class="field-label">¿Cómo te encuentran clientes nuevos?</label><input type="text" name="adq" placeholder="Pasan por Visto, recomendados, Instagram..."></div>
+    <div class="field"><label class="field-label">Queja o duda más común</label><input type="text" name="queja" placeholder="Preguntan si son originales, tallas..."></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="5">
+    <div class="section-number">05</div><h2 class="section-title">La competencia</h2><p class="section-desc">Quiénes son, qué hacen, por qué Rojo es diferente.</p>
+    <div class="field"><label class="field-label">3-5 competidores que te preocupan</label><div class="field-numbered"><span class="num">01</span><input type="text" name="c1" placeholder="Nombre / @ / ubicación"></div><div class="field-numbered"><span class="num">02</span><input type="text" name="c2" placeholder="Nombre / @ / ubicación"></div><div class="field-numbered"><span class="num">03</span><input type="text" name="c3" placeholder="Nombre / @ / ubicación"></div><div class="field-numbered"><span class="num">04</span><input type="text" name="c4" placeholder="Nombre / @ / ubicación"></div><div class="field-numbered"><span class="num">05</span><input type="text" name="c5" placeholder="Nombre / @ / ubicación"></div></div>
+    <div class="field"><label class="field-label">¿Qué hacen ellos que tú no?</label><textarea name="cv" placeholder="Venden online, mejor redes..." rows="3"></textarea></div>
+    <div class="field"><label class="field-label">¿Tu ventaja real?</label><textarea name="tv" placeholder="¿Cuál es tu diferencial?" rows="3"></textarea></div>
+    <div class="field"><label class="field-label">Tus precios vs. competencia</label><div class="option-group"><label class="option-item" onclick="selectOption(this)"><input type="radio" name="pc" value="baratos"><div class="option-dot"></div><span class="option-text">Más baratos</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="pc" value="similar"><div class="option-dot"></div><span class="option-text">Similares</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="pc" value="caros"><div class="option-dot"></div><span class="option-text">Más caros pero mejor calidad</span></label></div></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="6">
+    <div class="section-number">06</div><h2 class="section-title">La marca</h2><p class="section-desc">Cómo quieres que Rojo se sienta, se vea y se perciba.</p>
+    <div class="field"><label class="field-label">¿Tiene logo?</label><div class="option-group"><label class="option-item" onclick="selectOption(this)"><input type="radio" name="logo" value="si"><div class="option-dot"></div><span class="option-text">Sí, tengo uno</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="logo" value="idea"><div class="option-dot"></div><span class="option-text">No, pero tengo idea</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="logo" value="no"><div class="option-dot"></div><span class="option-text">No, necesito que lo creemos</span></label></div></div>
+    <div class="field"><label class="field-label">¿Por qué "Rojo"?</label><textarea name="nomh" placeholder="¿Hay historia detrás?" rows="3"></textarea></div>
+    <div class="field"><label class="field-label">Si Rojo fuera una persona, ¿cómo sería?</label><span class="field-hint">Joven/maduro, serio/relajado, urbano/deportivo, atrevido/clásico.</span><textarea name="pers" placeholder="Ej: Pelado de 25, streetwear, confiado..." rows="3"></textarea></div>
+    <div class="field"><label class="field-label">Marcas o cuentas que te gusten visualmente</label><div class="field-numbered"><span class="num">01</span><input type="text" name="r1" placeholder="Marca o @cuenta"></div><div class="field-numbered"><span class="num">02</span><input type="text" name="r2" placeholder="Marca o @cuenta"></div><div class="field-numbered"><span class="num">03</span><input type="text" name="r3" placeholder="Marca o @cuenta"></div></div>
+    <div class="field"><label class="field-label">¿Qué NO quieres que Rojo sea?</label><textarea name="nq" placeholder="No bodega, no mercado de pulgas..." rows="3"></textarea></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="7">
+    <div class="section-number">07</div><h2 class="section-title">Presencia digital</h2><p class="section-desc">Lo que Rojo tiene activo hoy en internet.</p>
+    <div class="field-row"><div class="field"><label class="field-label">Instagram @</label><input type="text" name="ig" placeholder="@rojo.tennis"></div><div class="field"><label class="field-label">Seguidores</label><input type="text" name="igs" placeholder="1,200"></div></div>
+    <div class="field-row"><div class="field"><label class="field-label">TikTok @</label><input type="text" name="tk" placeholder="@rojo.tennis"></div><div class="field"><label class="field-label">Seguidores</label><input type="text" name="tks" placeholder="500"></div></div>
+    <div class="field"><label class="field-label">¿WhatsApp Business?</label><div class="option-group"><label class="option-item" onclick="selectOption(this)"><input type="radio" name="wab" value="full"><div class="option-dot"></div><span class="option-text">Sí, configurado</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="wab" value="basic"><div class="option-dot"></div><span class="option-text">Business pero básico</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="wab" value="personal"><div class="option-dot"></div><span class="option-text">WhatsApp personal</span></label></div></div>
+    <div class="field"><label class="field-label">¿Página web?</label><input type="text" name="web" placeholder="No / Sí — www.rojo.com.co"></div>
+    <div class="field"><label class="field-label">¿Quién maneja redes?</label><input type="text" name="redes" placeholder="Yo mismo, un primo, community manager..."></div>
+    <div class="field"><label class="field-label">¿Fotos propias o del proveedor?</label><div class="option-group"><label class="option-item" onclick="selectOption(this)"><input type="radio" name="fot" value="propias"><div class="option-dot"></div><span class="option-text">Propias</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="fot" value="prov"><div class="option-dot"></div><span class="option-text">Del proveedor / internet</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="fot" value="mix"><div class="option-dot"></div><span class="option-text">Mezcla</span></label></div></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="8">
+    <div class="section-number">08</div><h2 class="section-title">Ventas y operación</h2><p class="section-desc">Números reales. Confidencial.</p>
+    <div class="field"><label class="field-label">¿Cuántos pares al mes?</label><input type="text" name="vmes" placeholder="150-200 pares"></div>
+    <div class="field"><label class="field-label">Ticket promedio</label><input type="text" name="tick" placeholder="Mayoría 1 par, a veces 2"></div>
+    <div class="field"><label class="field-label">Métodos de pago</label><div class="option-group"><label class="option-item" onclick="toggleOption(this)"><input type="checkbox" name="pay" value="cash"><div class="option-dot"></div><span class="option-text">Efectivo</span></label><label class="option-item" onclick="toggleOption(this)"><input type="checkbox" name="pay" value="nequi"><div class="option-dot"></div><span class="option-text">Nequi</span></label><label class="option-item" onclick="toggleOption(this)"><input type="checkbox" name="pay" value="davi"><div class="option-dot"></div><span class="option-text">Daviplata</span></label><label class="option-item" onclick="toggleOption(this)"><input type="checkbox" name="pay" value="transf"><div class="option-dot"></div><span class="option-text">Transferencia</span></label><label class="option-item" onclick="toggleOption(this)"><input type="checkbox" name="pay" value="card"><div class="option-dot"></div><span class="option-text">Tarjeta / datáfono</span></label></div></div>
+    <div class="field"><label class="field-label">¿Hace envíos?</label><textarea name="env" placeholder="Solo Bogotá, contraentrega..." rows="3"></textarea></div>
+    <div class="field-row"><div class="field"><label class="field-label">Meses fuertes</label><input type="text" name="mf" placeholder="Dic, Jun, Ene"></div><div class="field"><label class="field-label">Meses flojos</label><input type="text" name="mb" placeholder="Feb, Sep"></div></div>
+    <div class="field"><label class="field-label">¿Ha pautado antes?</label><textarea name="pub" placeholder="$100,000 en Instagram, vendí 5 pares..." rows="3"></textarea></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="9">
+    <div class="section-number">09</div><h2 class="section-title">Objetivos y visión</h2><p class="section-desc">A dónde quieres llevar a Rojo. Piensa en grande.</p>
+    <div class="field"><label class="field-label">¿Qué lograr en 30 días?</label><textarea name="o30" placeholder="Más ventas, seguidores, vender online..." rows="3"></textarea></div>
+    <div class="field"><label class="field-label">¿En 3 meses?</label><textarea name="o90" placeholder="¿Dónde quieres estar?" rows="3"></textarea></div>
+    <div class="field"><label class="field-label">¿En 6 meses a 1 año?</label><span class="field-hint">¿Otro punto? ¿Nacional? ¿Referencia en San Victorino?</span><textarea name="o365" placeholder="El sueño grande..." rows="3"></textarea></div>
+    <div class="divider"></div>
+    <div class="field"><label class="field-label">Presupuesto publicidad/mes</label><input type="text" name="ba" placeholder="$500,000 COP"></div>
+    <div class="field"><label class="field-label">Presupuesto herramientas digitales/mes</label><input type="text" name="bt" placeholder="$100,000 COP"></div>
+    <div class="field"><label class="field-label">Presupuesto contenido/mes</label><input type="text" name="bc" placeholder="$200,000 COP"></div>
+    <div class="divider"></div>
+    <div class="field"><label class="field-label">¿Alguien puede crear contenido?</label><span class="field-hint">TikToks, fotos, editar. Con celular está bien.</span><input type="text" name="cre" placeholder="Sí, yo mismo / No, nadie"></div>
+    <div class="field"><label class="field-label">¿Serías la cara de Rojo en TikTok?</label><span class="field-hint">Marcas con rostro explotan más. No es obligatorio.</span><div class="option-group"><label class="option-item" onclick="selectOption(this)"><input type="radio" name="cara" value="si"><div class="option-dot"></div><span class="option-text">Sí, me animo</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="cara" value="otro"><div class="option-dot"></div><span class="option-text">Otra persona del equipo</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="cara" value="anon"><div class="option-dot"></div><span class="option-text">Anónima (solo producto)</span></label></div></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="prevSection()">← Atrás</button><button class="btn btn-primary" onclick="nextSection()">Siguiente →</button></div>
+</div>
+
+<div class="section" data-section="10">
+    <div class="section-number">10</div><h2 class="section-title">Último paso</h2><p class="section-desc">Assets y lo que no te hayamos preguntado.</p>
+    <div class="field"><label class="field-label">¿Fotos del local o producto?</label><div class="option-group"><label class="option-item" onclick="selectOption(this)"><input type="radio" name="fx" value="buenas"><div class="option-dot"></div><span class="option-text">Sí, buenas fotos</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="fx" value="basicas"><div class="option-dot"></div><span class="option-text">Básicas (celular)</span></label><label class="option-item" onclick="selectOption(this)"><input type="radio" name="fx" value="no"><div class="option-dot"></div><span class="option-text">Casi no tengo</span></label></div></div>
+    <div class="field"><label class="field-label">¿Material de marca?</label><span class="field-hint">Tarjetas, bolsas, stickers, empaques.</span><input type="text" name="mat" placeholder="Bolsas con nombre, nada más"></div>
+    <div class="field-row"><div class="field"><label class="field-label">Tu nombre y rol</label><input type="text" name="nom" placeholder="Juan Pérez — Dueño"></div><div class="field"><label class="field-label">Email</label><input type="text" name="email" placeholder="tu@email.com"></div></div>
+    <div class="divider"></div>
+    <div class="field"><label class="field-label">¿Algo más?</label><span class="field-hint">Ideas, preocupaciones, sueños, limitaciones.</span><textarea name="extra" placeholder="Espacio libre..." rows="4"></textarea></div>
+    <div class="btn-row" style="flex-direction:column;gap:16px"><button class="btn btn-submit" onclick="submitForm()">Enviar briefing</button><button class="btn btn-secondary" onclick="prevSection()" style="width:100%">← Volver a revisar</button></div>
+</div>
+
+<div class="success-screen" id="successScreen">
+    <div class="success-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+    <h2 class="success-title">Briefing enviado.</h2>
+    <p class="success-text">Ahora empieza lo bueno. El equipo creativo va a trabajar en la identidad visual, la estrategia de contenido y el plan digital de Rojo.<br><br><strong style="color:var(--blanco)">Próximo paso:</strong> envía las mejores fotos del local y productos por WhatsApp.<br><br><span style="color:var(--rojo)">En 90 días, cuando alguien piense en tenis con estilo a buen precio en Bogotá, va a pensar en Rojo.</span></p>
+</div>
+
+</div>
+<div class="footer">Dirección Creativa · Proyecto <span>Rojo</span> · 2026</div>
+
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwfMoUDRRTFpR0mELt9D2JczvmJSbzsWh_Io74GHT4lxLetq3l18VA1LhgQhbcAySXhg/exec";
-
-let cs = 0;
-const ts = 11;
-const sn = [
-  'INICIO',
-  '01 — NEGOCIO',
-  '02 — PRODUCTO',
-  '03 — PROVEEDORES',
-  '04 — CLIENTE',
-  '05 — COMPETENCIA',
-  '06 — MARCA',
-  '07 — DIGITAL',
-  '08 — VENTAS',
-  '09 — OBJETIVOS',
-  '10 — CIERRE'
-];
-
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    document.getElementById('loader').classList.add('hidden');
-    document.getElementById('header').style.opacity = '1';
-    document.getElementById('header').style.transition = 'opacity .5s';
-    document.getElementById('mainContent').style.opacity = '1';
-    document.getElementById('mainContent').style.transition = 'opacity .5s .2s';
-  }, 1800);
-});
-
-function up() {
-  document.getElementById('progressBar').style.width = (cs / (ts - 1)) * 100 + '%';
-  document.getElementById('headerStep').textContent = sn[cs] || '';
-}
-
-function ss(i) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  const t = document.querySelector(`[data-section="${i}"]`);
-  if (t) {
-    void t.offsetWidth;
-    t.classList.add('active');
-  }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  up();
-}
-
-function nextSection() {
-  if (cs < ts - 1) {
-    cs++;
-    ss(cs);
-  }
-}
-
-function prevSection() {
-  if (cs > 0) {
-    cs--;
-    ss(cs);
-  }
-}
-
-function selectOption(el) {
-  el.closest('.option-group').querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
-  el.classList.add('selected');
-  el.querySelector('input').checked = true;
-}
-
-function toggleOption(el) {
-  el.classList.toggle('selected');
-  const i = el.querySelector('input');
-  i.checked = !i.checked;
-}
-
-function collectFormData() {
-  const fd = {};
-
-  document.querySelectorAll('input, textarea').forEach(el => {
-    if (!el.name) return;
-
-    if (el.type === 'radio') {
-      if (el.checked) fd[el.name] = el.value;
-    } else if (el.type === 'checkbox') {
-      if (!fd[el.name]) fd[el.name] = [];
-      if (el.checked) fd[el.name].push(el.value);
-    } else {
-      fd[el.name] = el.value ? el.value.trim() : '';
-    }
-  });
-
-  return fd;
-}
-
-async function submitForm() {
-  const submitBtn = document.querySelector('.btn-submit');
-  const originalText = submitBtn.textContent;
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Enviando...';
-  submitBtn.style.opacity = '0.7';
-  submitBtn.style.cursor = 'not-allowed';
-
-  try {
-    const rawData = collectFormData();
-
-    const payload = {};
-    Object.keys(rawData).forEach(key => {
-      if (Array.isArray(rawData[key])) {
-        payload[key] = rawData[key].join(', ');
-      } else {
-        payload[key] = rawData[key];
-      }
-    });
-
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-      },
-      body: new URLSearchParams(payload).toString()
-    });
-
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById('successScreen').classList.add('active');
-    document.getElementById('progressBar').style.width = '100%';
-    document.getElementById('headerStep').textContent = 'COMPLETADO';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  } catch (error) {
-    console.error('Error al enviar el formulario:', error);
-    alert('Hubo un problema al enviar el briefing. Revisa la implementación del Apps Script e inténtalo otra vez.');
-    submitBtn.disabled = false;
-    submitBtn.textContent = originalText;
-    submitBtn.style.opacity = '1';
-    submitBtn.style.cursor = 'pointer';
-  }
-}
-
+let cs=0;const ts=11;
+const sn=['INICIO','01 — NEGOCIO','02 — PRODUCTO','03 — PROVEEDORES','04 — CLIENTE','05 — COMPETENCIA','06 — MARCA','07 — DIGITAL','08 — VENTAS','09 — OBJETIVOS','10 — CIERRE'];
+window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('loader').classList.add('hidden');document.getElementById('header').style.opacity='1';document.getElementById('header').style.transition='opacity .5s';document.getElementById('mainContent').style.opacity='1';document.getElementById('mainContent').style.transition='opacity .5s .2s'},1800)});
+function up(){document.getElementById('progressBar').style.width=(cs/(ts-1))*100+'%';document.getElementById('headerStep').textContent=sn[cs]||''}
+function ss(i){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));const t=document.querySelector(`[data-section="${i}"]`);if(t){void t.offsetWidth;t.classList.add('active')}window.scrollTo({top:0,behavior:'smooth'});up()}
+function nextSection(){if(cs<ts-1){cs++;ss(cs)}}
+function prevSection(){if(cs>0){cs--;ss(cs)}}
+function selectOption(el){el.closest('.option-group').querySelectorAll('.option-item').forEach(i=>i.classList.remove('selected'));el.classList.add('selected');el.querySelector('input').checked=true}
+function toggleOption(el){el.classList.toggle('selected');const i=el.querySelector('input');i.checked=!i.checked}
+function submitForm(){const fd={};document.querySelectorAll('input,textarea').forEach(el=>{if(el.type==='radio'){if(el.checked)fd[el.name]=el.value}else if(el.type==='checkbox'){if(!fd[el.name])fd[el.name]=[];if(el.checked)fd[el.name].push(el.value)}else{if(el.name&&el.value)fd[el.name]=el.value}});console.log('Form data:',fd);document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('successScreen').classList.add('active');document.getElementById('progressBar').style.width='100%';document.getElementById('headerStep').textContent='COMPLETADO';window.scrollTo({top:0,behavior:'smooth'})}
 up();
 </script>
+</body>
+</html>
